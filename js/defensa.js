@@ -90,24 +90,46 @@
     if (s.querySelector(".kpi")) countUp(s);
   }
   function onLeave(s) {
-    Array.prototype.forEach.call(s.querySelectorAll("video"), function (v) { v.remove(); });
+    Array.prototype.forEach.call(s.querySelectorAll(".thumb"), stopPreview);
   }
 
-  // Vista previa de video al pasar el mouse (como en el sitio)
+  // Adelantos CON SONIDO al pasar el mouse (video o audio del podcast)
+  function stopPreview(t) {
+    var m = t.querySelector("video, audio"); if (m) { try { m.pause(); } catch (e) {} m.remove(); }
+    t.classList.remove("playing");
+  }
+  function startPreview(t) {
+    if (t.querySelector("video, audio")) return;
+    var isAudio = t.hasAttribute("data-audio"), m;
+    if (isAudio) { m = document.createElement("audio"); m.src = t.getAttribute("data-audio"); }
+    else {
+      m = document.createElement("video"); m.src = t.getAttribute("data-mp4"); m.playsInline = true; m.loop = true;
+      m.style.opacity = 0; m.style.transition = "opacity .4s";
+      m.addEventListener("playing", function () { m.style.opacity = 1; });
+    }
+    m.preload = "auto"; m.loop = true; m.muted = false; m.volume = 1;
+    if (isAudio) t.appendChild(m); else t.insertBefore(m, t.firstChild.nextSibling || null);
+    t.classList.add("playing");
+    var p = m.play();
+    if (p && p.catch) p.catch(function () {
+      // Si el navegador bloquea el sonido, reproducimos mudo (y el primer clic lo activa)
+      if (!isAudio) { m.muted = true; var q = m.play(); if (q && q.catch) q.catch(function () {}); }
+    });
+  }
   document.addEventListener("mouseover", function (e) {
-    var t = e.target.closest && e.target.closest(".thumb[data-mp4]");
-    if (!t || t.querySelector("video")) return;
-    var v = document.createElement("video");
-    v.src = t.getAttribute("data-mp4"); v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true; v.preload = "auto";
-    v.style.opacity = 0; v.style.transition = "opacity .4s";
-    v.addEventListener("playing", function () { v.style.opacity = 1; });
-    t.insertBefore(v, t.firstChild.nextSibling || null);
-    var p = v.play(); if (p && p.catch) p.catch(function () {});
+    var t = e.target.closest && e.target.closest(".thumb[data-mp4], .thumb[data-audio]");
+    if (t) startPreview(t);
   });
   document.addEventListener("mouseout", function (e) {
-    var t = e.target.closest && e.target.closest(".thumb[data-mp4]");
+    var t = e.target.closest && e.target.closest(".thumb[data-mp4], .thumb[data-audio]");
     if (!t || (e.relatedTarget && t.contains(e.relatedTarget))) return;
-    var v = t.querySelector("video"); if (v) v.remove();
+    stopPreview(t);
+  });
+  // En pantallas táctiles: un toque activa o detiene el adelanto
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest(".thumb[data-mp4], .thumb[data-audio]");
+    if (!t || !window.matchMedia("(hover: none)").matches) return;
+    if (t.querySelector("video, audio")) stopPreview(t); else startPreview(t);
   });
 
   /* ---------- Transición con el logo girando ---------- */
