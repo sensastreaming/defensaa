@@ -225,7 +225,7 @@ a { color: var(--gold); }
 .legend b { color: var(--text-primary); }
 
 /* ---------- 11 Método ---------- */
-.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin-top: 30px; position: relative; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 30px; position: relative; }
 .step { padding: 0 14px; position: relative; }
 .step .dotn { width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-size: 34px; color: #1a0d00; background: linear-gradient(135deg, var(--gold), var(--amber)); box-shadow: 0 0 0 10px rgba(212,175,55,.14), 0 0 34px rgba(212,175,55,.5); position: relative; z-index: 2; }
 .step::before { content: ""; position: absolute; left: 88px; right: -14px; top: 36px; height: 2px; background: repeating-linear-gradient(90deg, var(--gold) 0 10px, transparent 10px 20px); opacity: .6; }
